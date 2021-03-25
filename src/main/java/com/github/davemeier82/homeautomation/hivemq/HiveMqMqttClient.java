@@ -21,6 +21,8 @@ import com.github.davemeier82.homeautomation.core.event.EventPublisher;
 import com.github.davemeier82.homeautomation.core.mqtt.MqttClient;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
+import com.hivemq.client.mqtt.mqtt3.Mqtt3ClientBuilder;
+import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,16 +45,30 @@ public class HiveMqMqttClient implements MqttClient {
       EventFactory eventFactory,
       EventPublisher eventPublisher,
       String serverHost,
-      int serverPort
+      int serverPort,
+      String username,
+      String password
   ) {
     this.eventFactory = eventFactory;
     this.eventPublisher = eventPublisher;
-    client = com.hivemq.client.mqtt.MqttClient.builder()
+
+    Mqtt3ClientBuilder mqtt3ClientBuilder = com.hivemq.client.mqtt.MqttClient.builder()
         .useMqttVersion3()
         .identifier(UUID.randomUUID().toString())
         .serverHost(serverHost)
         .serverPort(serverPort)
-        .automaticReconnectWithDefaultConfig()
+        .automaticReconnectWithDefaultConfig();
+
+    if (username != null) {
+      mqtt3ClientBuilder.simpleAuth(
+          Mqtt3SimpleAuth.builder()
+              .username(username)
+              .password(password.getBytes(UTF_8))
+              .build()
+      );
+    }
+
+    client = mqtt3ClientBuilder
         .buildAsync();
   }
 

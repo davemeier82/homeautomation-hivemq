@@ -16,8 +16,8 @@
 
 package com.github.davemeier82.homeautomation.hivemq;
 
-import com.github.davemeier82.homeautomation.core.event.EventFactory;
 import com.github.davemeier82.homeautomation.core.event.EventPublisher;
+import com.github.davemeier82.homeautomation.core.event.factory.EventFactory;
 import com.github.davemeier82.homeautomation.core.mqtt.MqttClient;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
@@ -60,7 +60,7 @@ public class HiveMqMqttClient implements MqttClient {
         .automaticReconnectWithDefaultConfig();
 
     if (username != null) {
-      mqtt3ClientBuilder.simpleAuth(
+      mqtt3ClientBuilder = mqtt3ClientBuilder.simpleAuth(
           Mqtt3SimpleAuth.builder()
               .username(username)
               .password(password.getBytes(UTF_8))
@@ -68,8 +68,7 @@ public class HiveMqMqttClient implements MqttClient {
       );
     }
 
-    client = mqtt3ClientBuilder
-        .buildAsync();
+    client = mqtt3ClientBuilder.buildAsync();
   }
 
   @Override
@@ -117,9 +116,7 @@ public class HiveMqMqttClient implements MqttClient {
   public void subscribe(String topic, BiConsumer<String, Optional<ByteBuffer>> consumer) {
     client.subscribeWith()
         .topicFilter(topic)
-        .callback(publish -> {
-          consumer.accept(publish.getTopic().toString(), publish.getPayload());
-        })
+        .callback(publish -> consumer.accept(publish.getTopic().toString(), publish.getPayload()))
         .send()
         .whenComplete((subAck, throwable) -> {
           if (throwable != null) {

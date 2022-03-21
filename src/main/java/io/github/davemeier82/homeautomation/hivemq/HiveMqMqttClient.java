@@ -16,13 +16,13 @@
 
 package io.github.davemeier82.homeautomation.hivemq;
 
-import io.github.davemeier82.homeautomation.core.event.EventPublisher;
-import io.github.davemeier82.homeautomation.core.event.factory.EventFactory;
-import io.github.davemeier82.homeautomation.core.mqtt.MqttClient;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3ClientBuilder;
 import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth;
+import io.github.davemeier82.homeautomation.core.event.EventPublisher;
+import io.github.davemeier82.homeautomation.core.event.factory.EventFactory;
+import io.github.davemeier82.homeautomation.core.mqtt.MqttClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +33,12 @@ import java.util.function.BiConsumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+/**
+ * HiveMq implementation of {@link MqttClient}.
+ *
+ * @author David Meier
+ * @since 0.1.0
+ */
 public class HiveMqMqttClient implements MqttClient {
 
   private static final Logger log = LoggerFactory.getLogger(HiveMqMqttClient.class);
@@ -41,6 +47,16 @@ public class HiveMqMqttClient implements MqttClient {
   private final EventPublisher eventPublisher;
   private boolean connected = false;
 
+  /**
+   * Constructor
+   *
+   * @param eventFactory   the event factory
+   * @param eventPublisher the event publisher
+   * @param serverHost     MQTT Broker hostname
+   * @param serverPort     MQTT Broker port
+   * @param username       username of MQTT Broker or null if none
+   * @param password       password of MQTT Broker or null if none
+   */
   public HiveMqMqttClient(
       EventFactory eventFactory,
       EventPublisher eventPublisher,

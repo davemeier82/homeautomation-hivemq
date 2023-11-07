@@ -24,7 +24,7 @@
     </parent>
 
     <artifactId>homeautomation-hivemq</artifactId>
-    <version>0.2.2</version>
+    <version>0.2.3-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>HomeAutomation HiveMQ MQTT Client</description>
@@ -47,7 +47,7 @@
         <connection>scm:git:git://github.com/davemeier82/homeautomation-hivemq.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/davemeier82/homeautomation-hivemq.git</developerConnection>
         <url>https://github.com/davemeier82/homeautomation-hivemq</url>
-        <tag>homeautomation-hivemq-0.2.2</tag>
+        <tag>HEAD</tag>
     </scm>
     <issueManagement>
         <system>GitHub</system>

@@ -17,9 +17,9 @@
 package io.github.davemeier82.homeautomation.hivemq;
 
 import com.hivemq.client.mqtt.datatypes.MqttQos;
-import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
-import com.hivemq.client.mqtt.mqtt3.Mqtt3ClientBuilder;
-import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth;
+import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
+import com.hivemq.client.mqtt.mqtt5.Mqtt5ClientBuilder;
+import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth;
 import io.github.davemeier82.homeautomation.core.event.EventPublisher;
 import io.github.davemeier82.homeautomation.core.event.factory.EventFactory;
 import io.github.davemeier82.homeautomation.core.mqtt.MqttClient;
@@ -28,10 +28,11 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.UUID.randomUUID;
 
 /**
  * HiveMq implementation of {@link MqttClient}.
@@ -42,20 +43,22 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class HiveMqMqttClient implements MqttClient {
 
   private static final Logger log = LoggerFactory.getLogger(HiveMqMqttClient.class);
-  private final Mqtt3AsyncClient client;
+  private final Mqtt5AsyncClient client;
   private final EventFactory eventFactory;
   private final EventPublisher eventPublisher;
+  private final String subscriptionTopicPrefix;
   private boolean connected = false;
 
   /**
    * Constructor
    *
-   * @param eventFactory   the event factory
-   * @param eventPublisher the event publisher
-   * @param serverHost     MQTT Broker hostname
-   * @param serverPort     MQTT Broker port
-   * @param username       username of MQTT Broker or null if none
-   * @param password       password of MQTT Broker or null if none
+   * @param eventFactory            the event factory
+   * @param eventPublisher          the event publisher
+   * @param serverHost              MQTT Broker hostname
+   * @param serverPort              MQTT Broker port
+   * @param username                username of MQTT Broker or null if none
+   * @param password                password of MQTT Broker or null if none
+   * @param subscriptionTopicPrefix prefix for subscription topic i.e. for a $share group
    */
   public HiveMqMqttClient(
       EventFactory eventFactory,
@@ -63,28 +66,33 @@ public class HiveMqMqttClient implements MqttClient {
       String serverHost,
       int serverPort,
       String username,
-      String password
+      String password,
+      String subscriptionTopicPrefix
   ) {
     this.eventFactory = eventFactory;
     this.eventPublisher = eventPublisher;
+    this.subscriptionTopicPrefix = subscriptionTopicPrefix;
 
-    Mqtt3ClientBuilder mqtt3ClientBuilder = com.hivemq.client.mqtt.MqttClient.builder()
-        .useMqttVersion3()
-        .identifier(UUID.randomUUID().toString())
+    Mqtt5ClientBuilder mqtt5ClientBuilder = com.hivemq.client.mqtt.MqttClient.builder()
+        .useMqttVersion5()
+        .identifier(randomUUID().toString())
+        .executorConfig()
+        .nettyExecutor(Executors.newVirtualThreadPerTaskExecutor())
+        .applyExecutorConfig()
         .serverHost(serverHost)
         .serverPort(serverPort)
         .automaticReconnectWithDefaultConfig();
 
     if (username != null) {
-      mqtt3ClientBuilder = mqtt3ClientBuilder.simpleAuth(
-          Mqtt3SimpleAuth.builder()
+      mqtt5ClientBuilder = mqtt5ClientBuilder.simpleAuth(
+          Mqtt5SimpleAuth.builder()
               .username(username)
               .password(password.getBytes(UTF_8))
               .build()
       );
     }
 
-    client = mqtt3ClientBuilder.buildAsync();
+    client = mqtt5ClientBuilder.buildAsync();
   }
 
   @Override
@@ -131,7 +139,7 @@ public class HiveMqMqttClient implements MqttClient {
   @Override
   public void subscribe(String topic, BiConsumer<String, Optional<ByteBuffer>> consumer) {
     client.subscribeWith()
-        .topicFilter(topic)
+        .topicFilter(subscriptionTopicPrefix + topic)
         .callback(publish -> consumer.accept(publish.getTopic().toString(), publish.getPayload()))
         .send()
         .whenComplete((subAck, throwable) -> {

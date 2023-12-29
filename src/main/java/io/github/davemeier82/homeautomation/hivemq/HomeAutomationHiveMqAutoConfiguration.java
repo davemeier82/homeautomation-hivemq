@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.davemeier82.homeautomation.core.event.EventPublisher;
 import io.github.davemeier82.homeautomation.core.event.factory.EventFactory;
 import io.github.davemeier82.homeautomation.core.mqtt.MqttClient;
+import io.github.davemeier82.homeautomation.core.repositories.DevicePropertyRepository;
 import io.github.davemeier82.homeautomation.hivemq.mapper.EventToDtoMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
@@ -41,8 +42,8 @@ public class HomeAutomationHiveMqAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  EventToDtoMapper eventToDtoMapper() {
-    return new EventToDtoMapper();
+  EventToDtoMapper eventToDtoMapper(DevicePropertyRepository devicePropertyRepository) {
+    return new EventToDtoMapper(devicePropertyRepository);
   }
 
   @Bean

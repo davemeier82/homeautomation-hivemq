@@ -31,7 +31,7 @@ public class EventDto<T> {
   private final String propertyType;
 
   private final String label;
-  private final long propertyId;
+  private final int propertyId;
   private final T oldValue;
   private final T newValue;
   private final ZonedDateTime eventTime;
@@ -40,7 +40,8 @@ public class EventDto<T> {
   public EventDto(String type,
                   String id,
                   String propertyType,
-                  String label, long propertyId,
+                  String label,
+                  int propertyId,
                   T newValue,
                   T oldValue,
                   ZonedDateTime eventTime,

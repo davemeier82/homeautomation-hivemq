@@ -16,41 +16,35 @@
 
 package io.github.davemeier82.homeautomation.hivemq;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
-/**
- * Payload
- *
- * @author David Meier
- * @since 0.4.0
- */
-public class EventDto<T> {
+public class EventDto {
 
   private final String type;
   private final String id;
   private final String propertyType;
 
-  private final String label;
-  private final int propertyId;
-  private final T oldValue;
-  private final T newValue;
-  private final ZonedDateTime eventTime;
-  private final ZonedDateTime oldValueTime;
+  private final String displayName;
+  private final String propertyId;
+  private final Object oldValue;
+  private final Object newValue;
+  private final OffsetDateTime eventTime;
+  private final OffsetDateTime oldValueTime;
 
   public EventDto(String type,
                   String id,
                   String propertyType,
-                  String label,
-                  int propertyId,
-                  T newValue,
-                  T oldValue,
-                  ZonedDateTime eventTime,
-                  ZonedDateTime oldValueTime
+                  String displayName,
+                  String propertyId,
+                  Object newValue,
+                  Object oldValue,
+                  OffsetDateTime eventTime,
+                  OffsetDateTime oldValueTime
   ) {
     this.type = type;
     this.id = id;
     this.propertyType = propertyType;
-    this.label = label;
+    this.displayName = displayName;
     this.propertyId = propertyId;
     this.oldValue = oldValue;
     this.newValue = newValue;
@@ -66,31 +60,31 @@ public class EventDto<T> {
     return id;
   }
 
-  public String getLabel() {
-    return label;
+  public String getDisplayName() {
+    return displayName;
   }
 
   public String getPropertyType() {
     return propertyType;
   }
 
-  public long getPropertyId() {
+  public String getPropertyId() {
     return propertyId;
   }
 
-  public T getOldValue() {
+  public Object getOldValue() {
     return oldValue;
   }
 
-  public T getNewValue() {
+  public Object getNewValue() {
     return newValue;
   }
 
-  public ZonedDateTime getEventTime() {
+  public OffsetDateTime getEventTime() {
     return eventTime;
   }
 
-  public ZonedDateTime getOldValueTime() {
+  public OffsetDateTime getOldValueTime() {
     return oldValueTime;
   }
 }

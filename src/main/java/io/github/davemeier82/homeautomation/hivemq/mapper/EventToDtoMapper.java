@@ -16,20 +16,64 @@
 
 package io.github.davemeier82.homeautomation.hivemq.mapper;
 
-import io.github.davemeier82.homeautomation.core.device.Device;
 import io.github.davemeier82.homeautomation.core.device.property.DeviceProperty;
-import io.github.davemeier82.homeautomation.core.event.*;
+import io.github.davemeier82.homeautomation.core.device.property.DevicePropertyId;
+import io.github.davemeier82.homeautomation.core.event.AlarmStateChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.AlarmStateUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.BatteryLevelChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.BatteryLevelUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.CloudBaseChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.CloudBaseUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.Co2LevelChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.Co2LevelUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.DevicePropertyEvent;
+import io.github.davemeier82.homeautomation.core.event.DimmingLevelChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.DimmingLevelUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.HumidityChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.HumidityUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.IlluminanceChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.IlluminanceUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.MotionChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.MotionUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.PowerChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.PowerUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.PressureChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.PressureUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.RainIntervalAmountChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.RainIntervalAmountUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.RainRateChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.RainRateUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.RainTodayAmountChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.RainTodayAmountUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.RelayStateChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.RelayStateUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.RollerPositionChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.RollerPositionUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.RollerStateChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.RollerStateUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.SmokeStateChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.SmokeStateUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.TemperatureChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.TemperatureUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.UvIndexChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.UvIndexUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.WindDirectionChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.WindDirectionUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.WindGustDirectionChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.WindGustDirectionUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.WindGustSpeedChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.WindGustSpeedUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.WindRunChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.WindRunUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.WindSpeedChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.WindSpeedUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.WindowStateChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.WindowStateUpdatedEvent;
+import io.github.davemeier82.homeautomation.core.event.WindowTiltAngleChangedEvent;
+import io.github.davemeier82.homeautomation.core.event.WindowTiltAngleUpdatedEvent;
 import io.github.davemeier82.homeautomation.core.repositories.DevicePropertyRepository;
 import io.github.davemeier82.homeautomation.hivemq.EventDto;
 
-import java.util.Optional;
-
-/**
- * Maps {@link DevicePropertyEvent} to {@link EventDto}.
- *
- * @author David Meier
- * @since 0.1.0
- */
 public class EventToDtoMapper {
 
   public final DevicePropertyRepository devicePropertyRepository;
@@ -38,131 +82,79 @@ public class EventToDtoMapper {
     this.devicePropertyRepository = devicePropertyRepository;
   }
 
-  public EventDto<?> map(DevicePropertyEvent event) {
-    return devicePropertyRepository.getByDevicePropertyId(event.getDevicePropertyId()).map(deviceProperty -> {
-      Device device = deviceProperty.getDevice();
-      return switch (event) {
-        case RelayStateChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.isOn(), "RelayStateChangedEvent");
-        case TemperatureChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getTemperatureInDegree(), "TemperatureChangedEvent");
-        case HumidityChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getRelativeHumidityInPercent(), "HumidityChangedEvent");
-        case DimmingLevelChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getDimmingLevelInPercent(), "DimmingLevelChangedEvent");
-        case IlluminanceChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getLux(), "IlluminanceChangedEvent");
-        case RollerStateChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getState(), "RollerStateChangedEvent");
-        case RollerPositionChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getPositionInPercent(), "RollerPositionChangedEvent");
-        case BatteryLevelChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getBatteryLevelInPercent(), "BatteryLevelChangedEvent");
-        case PowerChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getWatt(), "PowerChangedEvent");
-        case WindowStateChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.isOpen(), "WindowStateChangedEvent");
-        case MotionChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.motionDetected(), "MotionChangedEvent");
-        case SmokeStateChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.isSmokeDetected(), "SmokeStateChangedEvent");
-        case Co2LevelChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getPpm(), "Co2LevelChangedEvent");
-        case AlarmStateChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getState(), "AlarmStateChangedEvent");
-        case PressureChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getPressureInMbar(), "PressureChangedEvent");
-        case UvIndexChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getUvIndex(), "UvIndexChangedEvent");
-        case CloudBaseChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getCloudBaseInMeter(), "CloudBaseChangedEvent");
-        case WindSpeedChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getKilometerPerHour(), "WindSpeedChangedEvent");
-        case WindGustSpeedChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getKilometerPerHour(), "WindGustSpeedChangedEvent");
-        case WindDirectionChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getDegree(), "WindDirectionChangedEvent");
-        case WindGustDirectionChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getDegree(), "WindGustDirectionChangedEvent");
-        case WindRunChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getKilometer(), "WindRunChangedEvent");
-        case RainIntervalAmountChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getMillimeter(), "RainIntervalAmountChangedEvent");
-        case RainTodayAmountChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getMillimeter(), "RainTodayAmountChangedEvent");
-        case RainRateChangedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getMillimeterPerHour(), "RainRateChangedEvent");
-        case RelayStateUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.isOn(), "RelayStateUpdatedEvent");
-        case TemperatureUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getTemperatureInDegree(), "TemperatureUpdatedEvent");
-        case HumidityUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getRelativeHumidityInPercent(), "HumidityUpdatedEvent");
-        case DimmingLevelUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getDimmingLevelInPercent(), "DimmingLevelUpdatedEvent");
-        case IlluminanceUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getLux(), "IlluminanceUpdatedEvent");
-        case RollerStateUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getState(), "RollerStateUpdatedEvent");
-        case RollerPositionUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getPositionInPercent(), "RollerPositionUpdatedEvent");
-        case BatteryLevelUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getBatteryLevelInPercent(), "BatteryLevelUpdatedEvent");
-        case PowerUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getWatt(), "PowerUpdatedEvent");
-        case WindowStateUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.isOpen(), "WindowStateUpdatedEvent");
-        case MotionUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.motionDetected(), "MotionUpdatedEvent");
-        case SmokeStateUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.isActive(), "SmokeStateUpdatedEvent");
-        case Co2LevelUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getPpm(), "Co2LevelUpdatedEvent");
-        case AlarmStateUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getState(), "AlarmStateUpdatedEvent");
-        case PressureUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getPressureInMbar(), "PressureUpdatedEvent");
-        case UvIndexUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getUvIndex(), "UvIndexUpdatedEvent");
-        case CloudBaseUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getCloudBaseInMeter(), "CloudBaseUpdatedEvent");
-        case WindSpeedUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getKilometerPerHour(), "WindSpeedUpdatedEvent");
-        case WindGustSpeedUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getKilometerPerHour(), "WindGustSpeedUpdatedEvent");
-        case WindDirectionUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getDegree(), "WindDirectionUpdatedEvent");
-        case WindGustDirectionUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getDegree(), "WindGustDirectionUpdatedEvent");
-        case WindRunUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getKilometer(), "WindRunUpdatedEvent");
-        case RainIntervalAmountUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getMillimeter(), "RainIntervalAmountUpdatedEvent");
-        case RainTodayAmountUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getMillimeter(), "RainTodayAmountUpdatedEvent");
-        case RainRateUpdatedEvent e ->
-            toEvent(deviceProperty, device, e.getPreviousValue(), e.getMillimeterPerHour(), "RainRateUpdatedEvent");
-        default -> null;
-      };
-
-    }).orElseThrow();
+  // TODO replace switch
+  public EventDto map(DevicePropertyEvent<?> event) {
+    return devicePropertyRepository.findByDevicePropertyId(event.getDevicePropertyId()).map(deviceProperty -> switch (event) {
+      case RelayStateChangedEvent e -> toEvent(deviceProperty, e, "RelayStateChangedEvent");
+      case TemperatureChangedEvent e -> toEvent(deviceProperty, e, "TemperatureChangedEvent");
+      case HumidityChangedEvent e -> toEvent(deviceProperty, e, "HumidityChangedEvent");
+      case DimmingLevelChangedEvent e -> toEvent(deviceProperty, e, "DimmingLevelChangedEvent");
+      case IlluminanceChangedEvent e -> toEvent(deviceProperty, e, "IlluminanceChangedEvent");
+      case RollerStateChangedEvent e -> toEvent(deviceProperty, e, "RollerStateChangedEvent");
+      case RollerPositionChangedEvent e -> toEvent(deviceProperty, e, "RollerPositionChangedEvent");
+      case BatteryLevelChangedEvent e -> toEvent(deviceProperty, e, "BatteryLevelChangedEvent");
+      case PowerChangedEvent e -> toEvent(deviceProperty, e, "PowerChangedEvent");
+      case WindowStateChangedEvent e -> toEvent(deviceProperty, e, "WindowStateChangedEvent");
+      case MotionChangedEvent e -> toEvent(deviceProperty, e, "MotionChangedEvent");
+      case SmokeStateChangedEvent e -> toEvent(deviceProperty, e, "SmokeStateChangedEvent");
+      case Co2LevelChangedEvent e -> toEvent(deviceProperty, e, "Co2LevelChangedEvent");
+      case AlarmStateChangedEvent e -> toEvent(deviceProperty, e, "AlarmStateChangedEvent");
+      case PressureChangedEvent e -> toEvent(deviceProperty, e, "PressureChangedEvent");
+      case UvIndexChangedEvent e -> toEvent(deviceProperty, e, "UvIndexChangedEvent");
+      case CloudBaseChangedEvent e -> toEvent(deviceProperty, e, "CloudBaseChangedEvent");
+      case WindSpeedChangedEvent e -> toEvent(deviceProperty, e, "WindSpeedChangedEvent");
+      case WindGustSpeedChangedEvent e -> toEvent(deviceProperty, e, "WindGustSpeedChangedEvent");
+      case WindDirectionChangedEvent e -> toEvent(deviceProperty, e, "WindDirectionChangedEvent");
+      case WindGustDirectionChangedEvent e -> toEvent(deviceProperty, e, "WindGustDirectionChangedEvent");
+      case WindRunChangedEvent e -> toEvent(deviceProperty, e, "WindRunChangedEvent");
+      case RainIntervalAmountChangedEvent e -> toEvent(deviceProperty, e, "RainIntervalAmountChangedEvent");
+      case RainTodayAmountChangedEvent e -> toEvent(deviceProperty, e, "RainTodayAmountChangedEvent");
+      case RainRateChangedEvent e -> toEvent(deviceProperty, e, "RainRateChangedEvent");
+      case RelayStateUpdatedEvent e -> toEvent(deviceProperty, e, "RelayStateUpdatedEvent");
+      case TemperatureUpdatedEvent e -> toEvent(deviceProperty, e, "TemperatureUpdatedEvent");
+      case HumidityUpdatedEvent e -> toEvent(deviceProperty, e, "HumidityUpdatedEvent");
+      case DimmingLevelUpdatedEvent e -> toEvent(deviceProperty, e, "DimmingLevelUpdatedEvent");
+      case IlluminanceUpdatedEvent e -> toEvent(deviceProperty, e, "IlluminanceUpdatedEvent");
+      case RollerStateUpdatedEvent e -> toEvent(deviceProperty, e, "RollerStateUpdatedEvent");
+      case RollerPositionUpdatedEvent e -> toEvent(deviceProperty, e, "RollerPositionUpdatedEvent");
+      case BatteryLevelUpdatedEvent e -> toEvent(deviceProperty, e, "BatteryLevelUpdatedEvent");
+      case PowerUpdatedEvent e -> toEvent(deviceProperty, e, "PowerUpdatedEvent");
+      case WindowStateUpdatedEvent e -> toEvent(deviceProperty, e, "WindowStateUpdatedEvent");
+      case MotionUpdatedEvent e -> toEvent(deviceProperty, e, "MotionUpdatedEvent");
+      case SmokeStateUpdatedEvent e -> toEvent(deviceProperty, e, "SmokeStateUpdatedEvent");
+      case Co2LevelUpdatedEvent e -> toEvent(deviceProperty, e, "Co2LevelUpdatedEvent");
+      case AlarmStateUpdatedEvent e -> toEvent(deviceProperty, e, "AlarmStateUpdatedEvent");
+      case PressureUpdatedEvent e -> toEvent(deviceProperty, e, "PressureUpdatedEvent");
+      case UvIndexUpdatedEvent e -> toEvent(deviceProperty, e, "UvIndexUpdatedEvent");
+      case CloudBaseUpdatedEvent e -> toEvent(deviceProperty, e, "CloudBaseUpdatedEvent");
+      case WindSpeedUpdatedEvent e -> toEvent(deviceProperty, e, "WindSpeedUpdatedEvent");
+      case WindGustSpeedUpdatedEvent e -> toEvent(deviceProperty, e, "WindGustSpeedUpdatedEvent");
+      case WindDirectionUpdatedEvent e -> toEvent(deviceProperty, e, "WindDirectionUpdatedEvent");
+      case WindGustDirectionUpdatedEvent e -> toEvent(deviceProperty, e, "WindGustDirectionUpdatedEvent");
+      case WindRunUpdatedEvent e -> toEvent(deviceProperty, e, "WindRunUpdatedEvent");
+      case RainIntervalAmountUpdatedEvent e -> toEvent(deviceProperty, e, "RainIntervalAmountUpdatedEvent");
+      case RainTodayAmountUpdatedEvent e -> toEvent(deviceProperty, e, "RainTodayAmountUpdatedEvent");
+      case RainRateUpdatedEvent e -> toEvent(deviceProperty, e, "RainRateUpdatedEvent");
+      case WindowTiltAngleChangedEvent e -> toEvent(deviceProperty, e, "WindowTiltAngleChangedEvent");
+      case WindowTiltAngleUpdatedEvent e -> toEvent(deviceProperty, e, "WindowTiltAngleUpdatedEvent");
+      default -> null;
+    }).orElseThrow(() -> new IllegalArgumentException("event not supported " + event.getClass().getSimpleName()));
   }
 
-  @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unchecked"})
-  private <T> EventDto<T> toEvent(DeviceProperty deviceProperty,
-                                  Device device,
-                                  Optional<DataWithTimestamp<?>> previousValue,
-                                  DataWithTimestamp<T> value,
+  private EventDto toEvent(DeviceProperty deviceProperty,
+                           DevicePropertyEvent<?> event,
                                   String propertyType
   ) {
-    return new EventDto<>(device.getType(),
-        device.getId(),
+    DevicePropertyId devicePropertyId = deviceProperty.getId();
+    return new EventDto(devicePropertyId.deviceId().type().getTypeName(),
+        devicePropertyId.deviceId().id(),
         propertyType,
-        deviceProperty.getLabel(),
-        deviceProperty.getId(),
-        value == null ? null : value.getValue(),
-        (T) previousValue.map(DataWithTimestamp::getValue).orElse(null),
-        value == null ? null : value.getDateTime(),
-        previousValue.map(DataWithTimestamp::getDateTime).orElse(null));
+        deviceProperty.getDisplayName(),
+        devicePropertyId.id(),
+        event.getNewValue(),
+        event.getPreviousValue().orElse(null),
+        event.getNewTimestamp(),
+        event.getPreviousTimestamp().orElse(null)
+    );
   }
 }

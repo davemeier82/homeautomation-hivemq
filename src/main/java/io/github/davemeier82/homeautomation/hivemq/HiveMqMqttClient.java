@@ -34,12 +34,6 @@ import java.util.function.BiConsumer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.UUID.randomUUID;
 
-/**
- * HiveMq implementation of {@link MqttClient}.
- *
- * @author David Meier
- * @since 0.1.0
- */
 public class HiveMqMqttClient implements MqttClient {
 
   private static final Logger log = LoggerFactory.getLogger(HiveMqMqttClient.class);
@@ -49,17 +43,6 @@ public class HiveMqMqttClient implements MqttClient {
   private final String subscriptionTopicPrefix;
   private boolean connected = false;
 
-  /**
-   * Constructor
-   *
-   * @param eventFactory            the event factory
-   * @param eventPublisher          the event publisher
-   * @param serverHost              MQTT Broker hostname
-   * @param serverPort              MQTT Broker port
-   * @param username                username of MQTT Broker or null if none
-   * @param password                password of MQTT Broker or null if none
-   * @param subscriptionTopicPrefix prefix for subscription topic i.e. for a $share group
-   */
   public HiveMqMqttClient(
       EventFactory eventFactory,
       EventPublisher eventPublisher,
@@ -156,4 +139,5 @@ public class HiveMqMqttClient implements MqttClient {
     connected = false;
     client.disconnect();
   }
+
 }

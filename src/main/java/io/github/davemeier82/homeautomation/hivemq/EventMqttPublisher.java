@@ -46,8 +46,8 @@ public class EventMqttPublisher {
   }
 
   @EventListener
-  public synchronized void handleEvent(DevicePropertyEvent event) {
-    EventDto<?> eventDto = eventToDtoMapper.map(event);
+  public synchronized void handleEvent(DevicePropertyEvent<?> event) {
+    EventDto eventDto = eventToDtoMapper.map(event);
     if (eventDto != null) {
       try {
         mqttClient.publish(topic, objectMapper.writeValueAsBytes(eventDto));

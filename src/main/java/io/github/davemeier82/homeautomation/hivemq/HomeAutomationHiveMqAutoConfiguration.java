@@ -22,32 +22,28 @@ import io.github.davemeier82.homeautomation.core.event.factory.EventFactory;
 import io.github.davemeier82.homeautomation.core.mqtt.MqttClient;
 import io.github.davemeier82.homeautomation.core.repositories.DevicePropertyRepository;
 import io.github.davemeier82.homeautomation.hivemq.mapper.EventToDtoMapper;
+import io.github.davemeier82.homeautomation.spring.core.HomeAutomationCoreAutoConfiguration;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
-
-/**
- * Auto configuration.
- *
- * @author David Meier
- * @since 0.4.0
- */
 @Configuration
-@AutoConfigureOrder(HIGHEST_PRECEDENCE)
+@AutoConfigureAfter(HomeAutomationCoreAutoConfiguration.class)
 public class HomeAutomationHiveMqAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
+  @ConditionalOnBean(DevicePropertyRepository.class)
   EventToDtoMapper eventToDtoMapper(DevicePropertyRepository devicePropertyRepository) {
     return new EventToDtoMapper(devicePropertyRepository);
   }
 
   @Bean
   @ConditionalOnMissingBean
+  @ConditionalOnBean({EventFactory.class, EventPublisher.class})
   MqttClient mqttClient(EventFactory eventFactory,
                         EventPublisher eventPublisher,
                         @Value("${hivemq.server.host}") String serverHost,

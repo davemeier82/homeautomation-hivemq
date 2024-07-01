@@ -20,6 +20,7 @@ import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5ClientBuilder;
 import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth;
+import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
 import io.github.davemeier82.homeautomation.core.event.EventPublisher;
 import io.github.davemeier82.homeautomation.core.event.factory.EventFactory;
 import io.github.davemeier82.homeautomation.core.mqtt.MqttClient;
@@ -57,21 +58,21 @@ public class HiveMqMqttClient implements MqttClient {
     this.subscriptionTopicPrefix = subscriptionTopicPrefix;
 
     Mqtt5ClientBuilder mqtt5ClientBuilder = com.hivemq.client.mqtt.MqttClient.builder()
-        .useMqttVersion5()
-        .identifier(randomUUID().toString())
-        .executorConfig()
-        .nettyExecutor(Executors.newVirtualThreadPerTaskExecutor())
-        .applyExecutorConfig()
-        .serverHost(serverHost)
-        .serverPort(serverPort)
-        .automaticReconnectWithDefaultConfig();
+                                                                             .useMqttVersion5()
+                                                                             .identifier(randomUUID().toString())
+                                                                             .executorConfig()
+                                                                             .nettyExecutor(Executors.newVirtualThreadPerTaskExecutor())
+                                                                             .applyExecutorConfig()
+                                                                             .serverHost(serverHost)
+                                                                             .serverPort(serverPort)
+                                                                             .automaticReconnectWithDefaultConfig();
 
     if (username != null) {
       mqtt5ClientBuilder = mqtt5ClientBuilder.simpleAuth(
           Mqtt5SimpleAuth.builder()
-              .username(username)
-              .password(password.getBytes(UTF_8))
-              .build()
+                         .username(username)
+                         .password(password.getBytes(UTF_8))
+                         .build()
       );
     }
 
@@ -83,35 +84,30 @@ public class HiveMqMqttClient implements MqttClient {
     return connected;
   }
 
-  @Override
-  public void connect() {
-    client.connectWith()
-        .willPublish().topic("homeautomation/will")
-        .payload("homeautomation lost connection".getBytes())
-        .applyWillPublish()
-        .send()
-        .whenComplete((connAck, throwable) -> {
-          if (throwable != null) {
-            log.error("failed to connect to server", throwable);
-          } else {
-            connected = true;
-            eventPublisher.publishEvent(eventFactory.createMqttClientConnectedEvent(this));
-          }
-        });
+  private static void consume(BiConsumer<String, Optional<ByteBuffer>> consumer, Mqtt5Publish publish) {
+    try {
+      consumer.accept(publish.getTopic().toString(), publish.getPayload());
+    } catch (Throwable throwable) {
+      // TODO: create ErrorEvent to allow sending push notifications
+      log.error("error to consume message of topic: {}", publish.getTopic(), throwable);
+    }
   }
 
   @Override
-  public void publish(String topic, byte[] payload) {
-    client.publishWith()
-        .topic(topic)
-        .payload(payload)
-        .qos(MqttQos.EXACTLY_ONCE)
-        .send()
-        .whenComplete((mqtt3Publish, throwable) -> {
-          if (throwable != null) {
-            log.error("failed to publish message to topic: {}", topic, throwable);
-          }
-        });
+  public void connect() {
+    client.connectWith()
+          .willPublish().topic("homeautomation/will")
+          .payload("homeautomation lost connection".getBytes())
+          .applyWillPublish()
+          .send()
+          .whenComplete((connAck, throwable) -> {
+            if (throwable != null) {
+              log.error("failed to connect to server", throwable);
+            } else {
+              connected = true;
+              eventPublisher.publishEvent(eventFactory.createMqttClientConnectedEvent(this));
+            }
+          });
   }
 
   @Override
@@ -120,18 +116,32 @@ public class HiveMqMqttClient implements MqttClient {
   }
 
   @Override
+  public void publish(String topic, byte[] payload) {
+    client.publishWith()
+          .topic(topic)
+          .payload(payload)
+          .qos(MqttQos.EXACTLY_ONCE)
+          .send()
+          .whenComplete((mqtt3Publish, throwable) -> {
+            if (throwable != null) {
+              log.error("failed to publish message to topic: {}", topic, throwable);
+            }
+          });
+  }
+
+  @Override
   public void subscribe(String topic, BiConsumer<String, Optional<ByteBuffer>> consumer) {
     client.subscribeWith()
-        .topicFilter(subscriptionTopicPrefix + topic)
-        .callback(publish -> consumer.accept(publish.getTopic().toString(), publish.getPayload()))
-        .send()
-        .whenComplete((subAck, throwable) -> {
-          if (throwable != null) {
-            log.error("failed to subscribe to topic: {}", topic, throwable);
-          } else {
-            log.info("successfully subscribed to topic: {}", topic);
-          }
-        });
+          .topicFilter(subscriptionTopicPrefix + topic)
+          .callback(publish -> consume(consumer, publish))
+          .send()
+          .whenComplete((subAck, throwable) -> {
+            if (throwable != null) {
+              log.error("failed to subscribe to topic: {}", topic, throwable);
+            } else {
+              log.info("successfully subscribed to topic: {}", topic);
+            }
+          });
   }
 
   @Override

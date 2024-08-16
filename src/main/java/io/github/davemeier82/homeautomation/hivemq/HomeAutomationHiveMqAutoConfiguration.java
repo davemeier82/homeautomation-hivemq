@@ -46,11 +46,11 @@ public class HomeAutomationHiveMqAutoConfiguration {
   @ConditionalOnBean({EventFactory.class, EventPublisher.class})
   MqttClient mqttClient(EventFactory eventFactory,
                         EventPublisher eventPublisher,
-                        @Value("${hivemq.server.host}") String serverHost,
-                        @Value("${hivemq.server.port:1883}") int serverPort,
-                        @Value("${hivemq.server.username:#{null}}") String username,
-                        @Value("${hivemq.server.password:#{null}}") String password,
-                        @Value("${hivemq.server.subscription-topic-prefix:$share/ha/}") String subscriptionTopicPrefix
+                        @Value("${homeautomation.hivemq.server.host}") String serverHost,
+                        @Value("${homeautomation.hivemq.server.port:1883}") int serverPort,
+                        @Value("${homeautomation.hivemq.server.username:#{null}}") String username,
+                        @Value("${homeautomation.hivemq.server.password:#{null}}") String password,
+                        @Value("${homeautomation.hivemq.server.subscription-topic-prefix:$share/ha/}") String subscriptionTopicPrefix
   ) {
     return new HiveMqMqttClient(eventFactory, eventPublisher, serverHost, serverPort, username, password, subscriptionTopicPrefix);
   }
@@ -60,7 +60,7 @@ public class HomeAutomationHiveMqAutoConfiguration {
   EventMqttPublisher eventMqttPublisher(EventToDtoMapper eventToDtoMapper,
                                         MqttClient mqttClient,
                                         ObjectMapper objectMapper,
-                                        @Value("${hivemq.event-topic:homeautomation/event}") String topic
+                                        @Value("${homeautomation.hivemq.event-topic:homeautomation/event}") String topic
   ) {
     return new EventMqttPublisher(eventToDtoMapper, mqttClient, objectMapper, topic);
   }

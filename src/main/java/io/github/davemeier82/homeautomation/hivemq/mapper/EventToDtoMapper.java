@@ -39,7 +39,6 @@ public class EventToDtoMapper {
   private EventDto toEvent(DeviceProperty deviceProperty,
                            DevicePropertyEvent<?> event
   ) {
-    System.err.println(event.getClass().getSimpleName());
     DevicePropertyId devicePropertyId = deviceProperty.getId();
     return new EventDto(devicePropertyId.deviceId().type().getTypeName(),
         devicePropertyId.deviceId().id(),

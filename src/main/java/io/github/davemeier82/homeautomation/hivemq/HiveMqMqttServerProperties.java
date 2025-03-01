@@ -17,19 +17,12 @@
 package io.github.davemeier82.homeautomation.hivemq;
 
 public class HiveMqMqttServerProperties {
-  private final String host;
-  private final String username;
-  private final String password;
+  private String host;
+  private String username;
+  private String password;
   private int port = 1883;
   private String subscriptionTopicPrefix = "$share/ha/";
 
-  public HiveMqMqttServerProperties(String subscriptionTopicPrefix, String password, String username, int port, String host) {
-    this.subscriptionTopicPrefix = subscriptionTopicPrefix;
-    this.password = password;
-    this.username = username;
-    this.port = port;
-    this.host = host;
-  }
 
   public String getHost() {
     return host;
@@ -49,5 +42,25 @@ public class HiveMqMqttServerProperties {
 
   public String getSubscriptionTopicPrefix() {
     return subscriptionTopicPrefix;
+  }
+
+  public void setPort(int port) {
+    this.port = port;
+  }
+
+  public void setSubscriptionTopicPrefix(String subscriptionTopicPrefix) {
+    this.subscriptionTopicPrefix = subscriptionTopicPrefix;
+  }
+
+  public void setHost(String host) {
+    this.host = host;
+  }
+
+  public void setUsername(String username) {
+    this.username = username;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
   }
 }

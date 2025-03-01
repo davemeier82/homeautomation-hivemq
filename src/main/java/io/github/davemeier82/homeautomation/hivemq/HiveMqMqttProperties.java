@@ -20,11 +20,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "homeautomation.hivemq")
 public class HiveMqMqttProperties {
-  private final HiveMqMqttServerProperties server;
+  private HiveMqMqttServerProperties server = new HiveMqMqttServerProperties();
   private String eventTopic = "homeautomation/event";
 
-  public HiveMqMqttProperties(HiveMqMqttServerProperties server, String eventTopic) {
-    this.server = server;
+  public void setEventTopic(String eventTopic) {
     this.eventTopic = eventTopic;
   }
 
@@ -34,5 +33,9 @@ public class HiveMqMqttProperties {
 
   public String getEventTopic() {
     return eventTopic;
+  }
+
+  public void setServer(HiveMqMqttServerProperties server) {
+    this.server = server;
   }
 }

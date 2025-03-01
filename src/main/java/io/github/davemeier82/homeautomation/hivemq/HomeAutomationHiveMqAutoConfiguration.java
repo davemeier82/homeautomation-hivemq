@@ -23,15 +23,16 @@ import io.github.davemeier82.homeautomation.core.mqtt.MqttClient;
 import io.github.davemeier82.homeautomation.core.repositories.DevicePropertyRepository;
 import io.github.davemeier82.homeautomation.hivemq.mapper.EventToDtoMapper;
 import io.github.davemeier82.homeautomation.spring.core.HomeAutomationCoreAutoConfiguration;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @AutoConfigureAfter(HomeAutomationCoreAutoConfiguration.class)
+@EnableConfigurationProperties(HiveMqMqttProperties.class)
 public class HomeAutomationHiveMqAutoConfiguration {
 
   @Bean
@@ -46,13 +47,9 @@ public class HomeAutomationHiveMqAutoConfiguration {
   @ConditionalOnBean({EventFactory.class, EventPublisher.class})
   MqttClient mqttClient(EventFactory eventFactory,
                         EventPublisher eventPublisher,
-                        @Value("${homeautomation.hivemq.server.host}") String serverHost,
-                        @Value("${homeautomation.hivemq.server.port:1883}") int serverPort,
-                        @Value("${homeautomation.hivemq.server.username:#{null}}") String username,
-                        @Value("${homeautomation.hivemq.server.password:#{null}}") String password,
-                        @Value("${homeautomation.hivemq.server.subscription-topic-prefix:$share/ha/}") String subscriptionTopicPrefix
+                        HiveMqMqttProperties hiveMqMqttProperties
   ) {
-    return new HiveMqMqttClient(eventFactory, eventPublisher, serverHost, serverPort, username, password, subscriptionTopicPrefix);
+    return new HiveMqMqttClient(eventFactory, eventPublisher, hiveMqMqttProperties.getServer());
   }
 
   @Bean
@@ -60,8 +57,8 @@ public class HomeAutomationHiveMqAutoConfiguration {
   EventMqttPublisher eventMqttPublisher(EventToDtoMapper eventToDtoMapper,
                                         MqttClient mqttClient,
                                         ObjectMapper objectMapper,
-                                        @Value("${homeautomation.hivemq.event-topic:homeautomation/event}") String topic
+                                        HiveMqMqttProperties hiveMqMqttProperties
   ) {
-    return new EventMqttPublisher(eventToDtoMapper, mqttClient, objectMapper, topic);
+    return new EventMqttPublisher(eventToDtoMapper, mqttClient, objectMapper, hiveMqMqttProperties.getEventTopic());
   }
 }

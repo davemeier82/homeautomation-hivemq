@@ -47,15 +47,11 @@ public class HiveMqMqttClient implements MqttClient {
   public HiveMqMqttClient(
       EventFactory eventFactory,
       EventPublisher eventPublisher,
-      String serverHost,
-      int serverPort,
-      String username,
-      String password,
-      String subscriptionTopicPrefix
+      HiveMqMqttServerProperties serverProperties
   ) {
     this.eventFactory = eventFactory;
     this.eventPublisher = eventPublisher;
-    this.subscriptionTopicPrefix = subscriptionTopicPrefix;
+    subscriptionTopicPrefix = serverProperties.getSubscriptionTopicPrefix();
 
     Mqtt5ClientBuilder mqtt5ClientBuilder = com.hivemq.client.mqtt.MqttClient.builder()
                                                                              .useMqttVersion5()
@@ -63,15 +59,15 @@ public class HiveMqMqttClient implements MqttClient {
                                                                              .executorConfig()
                                                                              .nettyExecutor(Executors.newVirtualThreadPerTaskExecutor())
                                                                              .applyExecutorConfig()
-                                                                             .serverHost(serverHost)
-                                                                             .serverPort(serverPort)
+                                                                             .serverHost(serverProperties.getHost())
+                                                                             .serverPort(serverProperties.getPort())
                                                                              .automaticReconnectWithDefaultConfig();
 
-    if (username != null) {
+    if (serverProperties.getUsername() != null) {
       mqtt5ClientBuilder = mqtt5ClientBuilder.simpleAuth(
           Mqtt5SimpleAuth.builder()
-                         .username(username)
-                         .password(password.getBytes(UTF_8))
+                         .username(serverProperties.getUsername())
+                         .password(serverProperties.getPassword().getBytes(UTF_8))
                          .build()
       );
     }

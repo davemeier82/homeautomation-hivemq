@@ -16,7 +16,6 @@
 
 package io.github.davemeier82.homeautomation.hivemq;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.davemeier82.homeautomation.core.event.EventPublisher;
 import io.github.davemeier82.homeautomation.core.event.factory.EventFactory;
 import io.github.davemeier82.homeautomation.core.mqtt.MqttClient;
@@ -29,6 +28,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 @AutoConfigureAfter(HomeAutomationCoreAutoConfiguration.class)

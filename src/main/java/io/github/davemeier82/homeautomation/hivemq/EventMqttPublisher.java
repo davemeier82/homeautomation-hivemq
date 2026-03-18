@@ -16,16 +16,13 @@
 
 package io.github.davemeier82.homeautomation.hivemq;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.davemeier82.homeautomation.core.event.DevicePropertyEvent;
 import io.github.davemeier82.homeautomation.core.mqtt.MqttClient;
 import io.github.davemeier82.homeautomation.hivemq.mapper.EventToDtoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
-
-import java.io.UncheckedIOException;
+import tools.jackson.databind.ObjectMapper;
 
 public class EventMqttPublisher {
 
@@ -51,12 +48,7 @@ public class EventMqttPublisher {
 
   @EventListener
   public synchronized void handleEvent(DevicePropertyEvent<?> event) {
-    eventToDtoMapper.map(event).ifPresentOrElse(eventDto -> {
-      try {
-        mqttClient.publish(topic, objectMapper.writeValueAsBytes(eventDto));
-      } catch (JsonProcessingException e) {
-        throw new UncheckedIOException(e);
-      }
-    }, () -> log.error("failed to map event {}", event.getClass().getName()));
+    eventToDtoMapper.map(event).ifPresentOrElse(eventDto ->
+        mqttClient.publish(topic, objectMapper.writeValueAsBytes(eventDto)), () -> log.error("failed to map event {}", event.getClass().getName()));
   }
 }
